@@ -4,7 +4,6 @@
 #import "@preview/cuti:0.4.0": show-cn-fakebold
 #import "config.typ": back-heading, front-heading, 字体, 字号
 #import "utils.typ": chinesenumber, chineseyear, split-text-by-width
-#import "styles.typ": sym-box-checked, sym-box-unchecked
 
 // 构建带自动换行的字段 grid
 #let build-field-grid(fields, name-width, value-width, row-height) = context {
@@ -37,27 +36,39 @@
   )
 }
 
-// 学位类型选择框
-// degree-type: "academic" | "professional"，其他值会触发 panic
-#let degree-type-checkbox(degree-type) = {
-  assert(
-    degree-type == "academic" or degree-type == "professional",
-    message: "degree-type 必须是 \"academic\" 或 \"professional\"，当前值: "
-      + repr(degree-type),
-  )
-  let academic-box = if degree-type == "academic" {
-    sym-box-checked(12pt)
+#let fit-title-cell(value, width) = context {
+  let value-text = value.split("\n").join(" ")
+  let title-size = if measure(text(字号.一号, font: 字体.黑体, weight: "bold")[
+    #value-text
+  ]).width <= width {
+    字号.一号
+  } else if measure(text(字号.二号, font: 字体.黑体, weight: "bold")[
+    #value-text
+  ]).width <= width {
+    字号.二号
   } else {
-    sym-box-unchecked(12pt)
+    字号.三号
   }
-  let professional-box = if degree-type == "professional" {
-    sym-box-checked(12pt)
-  } else {
-    sym-box-unchecked(12pt)
-  }
-  set align(center + horizon)
-  [#academic-box#h(0.5em)学术学位#h(4 * 0.5em)#professional-box#h(0.5em)专业学位]
+
+  box(width: width)[
+    #v(0.15em)
+    #align(center + horizon)[
+      #text(title-size, font: 字体.黑体, weight: "bold")[#value-text]
+    ]
+    #v(0.45em)
+  ]
 }
+
+#let signature-slot(signature: none, width: 3.2cm, height: 1.65em) = box(
+  width: width,
+  height: height,
+  baseline: 25%,
+)[
+  #place(bottom + left, line(length: 100%))
+  #if signature != none {
+    place(center + horizon)[#signature]
+  }
+]
 
 // 封面页（盲审版）
 #let cover-page-blind(
@@ -68,8 +79,12 @@
   cmajor: none,
   blindid: none,
   date: none,
-  degree-type: "academic",
+  degree-type: none,
 ) = {
+  set page(
+    "a4",
+    margin: (top: 25mm, bottom: 25mm, left: 25mm, right: 20mm),
+  )
   set align(center + top)
   text(字号.小初, font: 字体.黑体)[
     #show: show-cn-fakebold
@@ -89,14 +104,10 @@
 
     #linebreak()
 
-    一级学科：#cfirstmajor
-
-    二级学科：#cmajor
+    专业：#cmajor
 
     论文编号：#blindid
   ]
-  v(1fr)
-  degree-type-checkbox(degree-type)
   v(3fr)
   [#chineseyear(date.year) 年 #chinesenumber(date.month) 月]
 }
@@ -105,15 +116,21 @@
 #let cover-page-normal(
   cthesisname: none,
   ctitle: none,
+  etitle: none,
   cauthor: none,
   studentid: none,
   school: none,
   cmajor: none,
   direction: none,
   csupervisor: none,
-  degree-type: "academic",
+  degree-type: none,
   date: none,
 ) = {
+  set page(
+    "a4",
+    margin: (top: 25mm, bottom: 25mm, left: 25mm, right: 20mm),
+  )
+  set align(center + top)
   set text(字号.一号)
   box(
     grid(
@@ -126,29 +143,20 @@
   linebreak()
   text(字号.小初)[#strong(cthesisname)]
   v(1fr)
-  context {
-    set text(weight: "bold")
+  {
     show: show-cn-fakebold
-    let ctitle-parts = split-text-by-width(ctitle, 10.16cm)
-    let grid-contents = (
+    grid(
+      columns: (2.75cm, 10.16cm),
+      rows: (auto, auto),
+      align: center,
+      stroke: (x, y) => if x == 1 { (bottom: 0.75pt) } else { none },
       [
         #set align(center)
         #text(字号.二号, weight: "regular")[题目：]
       ],
-    )
-    for (i, part) in ctitle-parts.enumerate() {
-      grid-contents.push(strong(part))
-      if i < ctitle-parts.len() - 1 {
-        grid-contents.push([])
-      }
-    }
-
-    grid(
-      columns: (2.75cm, 10.16cm),
-      rows: 1.48cm,
-      align: center,
-      stroke: (x, y) => if x == 1 { (bottom: 1pt) } else { none },
-      ..grid-contents,
+      fit-title-cell(ctitle, 10.16cm),
+      [],
+      fit-title-cell(etitle, 10.16cm),
     )
   }
   v(5fr)
@@ -159,7 +167,6 @@
       (text("学") + h(2em) + text("号："), studentid),
       (text("院") + h(2em) + text("系："), school),
       (text("专") + h(2em) + text("业："), cmajor),
-      ("研究方向：", direction),
       ("导师姓名：", csupervisor),
     ),
     3.19cm,
@@ -167,16 +174,18 @@
     1.5em,
   )
 
-  v(2fr)
-  text(font: 字体.仿宋)[#degree-type-checkbox(degree-type)]
   v(1fr)
   text(font: 字体.宋体)[
-    #chineseyear(date.year) *年* #chinesenumber(date.month) *月*
+    #chineseyear(date.year) 年 #chinesenumber(date.month) 月
   ]
 }
 
 // 版权声明页
 #let copyright-page(linespacing: 10pt) = {
+  set page(
+    "a4",
+    margin: (top: 30mm, bottom: 25mm, left: 26mm, right: 26mm),
+  )
   set align(left + top)
   set text(字号.小四)
 
@@ -215,7 +224,7 @@
   // 但是会导致列表编号和列表内容无法对齐
   // 这里选择基于经验的配置
   set par(leading: 10.5pt, spacing: 10.5pt, justify: true)
-  front-heading("摘要", enter-front: true, header: "摘要")
+  front-heading("摘要", enter-front: true, header: [])
   set par(first-line-indent: first-line-indent)
   cabstract
   // 如果发现关键词和内容挤到一起，或者关键词在下一页顶部
@@ -236,36 +245,20 @@
   blind: false,
   eabstract,
 ) = {
-  // 英文摘要标题，页眉为 ABSTRACT
-  heading(
-    numbering: none,
-    outlined: false,
-    supplement: [#metadata((
-      pagebreak: true,
-      show-header: true,
-      header: "ABSTRACT",
-      spacing-before: 24pt,
-      spacing-after: 8pt,
-      linespacing: 2em,
-      font: (size: 字号.小二, font: "Arial", weight: "regular"),
-    ))],
-  )[#upper(etitle)]
+  front-heading(
+    "ABSTRACT",
+    show-header: false,
+    spacing-before: 24pt,
+    spacing-after: 8pt,
+    linespacing: 2em,
+    font: (size: 字号.三号, font: "Arial", weight: "bold"),
+  )
 
   // Word 模板中正文仍然是 20pt 行距
   // 对于纯英文字体，测试下来 12.5pt 的匹配效果较好
   set par(spacing: 12.5pt, leading: 12.5pt, justify: true)
-  if not blind {
-    [
-      #set align(center)
-      #eauthor \(#emajor\) \
-      Supervised by #esupervisor
-    ]
-  }
   // Word 模板中英文摘要的首行缩进固定为 0.74cm
   set par(first-line-indent: 0.74cm, justify: true)
-  v(8pt)
-  align(center)[#text(font: "Arial", weight: "bold")[ABSTRACT]]
-  v(6pt)
   eabstract
   v(1fr)
   let keyword-prefix = if ekeywords.len() == 1 {
@@ -280,7 +273,7 @@
 
 // 致谢页
 #let acknowledgements-page(first-line-indent: 2em, acknowledgements) = {
-  back-heading("致谢")
+  back-heading("致谢", show-header: false, show-footer: false)
   set par(
     first-line-indent: first-line-indent,
     leading: 10.5pt,
@@ -290,14 +283,18 @@
 }
 
 // 原创性声明和授权说明页
-#let declaration-page(cleandeclaration: false) = {
+#let declaration-page(
+  cleandeclaration: false,
+  candidate-signature: none,
+  supervisor-signature: none,
+) = {
   // Word 模板中首行缩进固定为 2em
   set par(first-line-indent: 2em)
   back-heading(
-    "北京大学学位论文原创性声明和使用授权说明",
+    "北京大学学位论文原创性声明与使用授权说明",
     pagebreak: true,
-    // Word 模板中原创性声明页有页眉，如果不想要，可以在这里手动关闭
-    show-header: not cleandeclaration,
+    show-header: false,
+    show-footer: false,
   )
 
   // 放置一个占位元素，用于清除页码
@@ -318,8 +315,9 @@
     #v(1fr)
 
     #align(right)[
-      论文作者签名
-      #h(5em)
+      论文作者签名：
+      #signature-slot(signature: candidate-signature, width: 4cm)
+      #h(2em)
       日期：
       #h(2em)
       年
@@ -335,7 +333,6 @@
       weight: "bold",
       show-cn-fakebold[学位论文使用授权说明],
     )]
-    #align(center)[#text(字号.五号)[（必须装订在提交学校图书馆的印刷本）]]
     #v(1fr)
 
     #set par(leading: 0.95em, spacing: 0.95em)
@@ -351,16 +348,15 @@
       - 按照学校要求提交学位论文的印刷本和电子版本；
       - 学校有权保存学位论文的印刷本和电子版，并提供目录检索与阅览服务，在校园网上提供服务；
       - 学校可以采用影印、缩印、数字化或其它复制手段保存论文；
-      - 因某种特殊原因须要延迟发布学位论文电子版，授权学校#box(width: 12pt, align(center, square(size: 9pt)))一年/#box(width: 12pt, align(center, square(size: 9pt)))两年/#box(width: 12pt, align(center, square(size: 9pt)))三年以后，在校园网上全文发布。
     ]
     #v(1fr)
-    #align(center)[（保密论文在解密后遵守此规定）]
-    #v(2fr)
-    #align(center)[
+    #align(right)[
       论文作者签名：
-      #h(5em)
+      #signature-slot(signature: candidate-signature)
+      #h(1.5em)
       导师签名：
-      #h(5em)
+      #signature-slot(signature: supervisor-signature)
+      #linebreak()
       #v(1em)
       日期：
       #h(2em)

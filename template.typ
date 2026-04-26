@@ -33,7 +33,7 @@
 #import "@preview/gb7714-bilingual:0.2.3": *
 
 // 导入并重导出所有公共符号
-#import "lib/config.typ": appendix, 字体, 字号, 引用记号
+#import "lib/config.typ": appendix, back-heading, 字体, 字号, 引用记号
 #import "lib/utils.typ": chinesenumbering
 #import "lib/components.typ": (
   as-booktab, booktab, chineseoutline, codeblock, listoffigures,
@@ -54,24 +54,24 @@
 
 // 主配置函数
 #let conf(
-  cauthor: "张三",
-  eauthor: "San Zhang",
+  cauthor: "城小环",
+  eauthor: "Xiaohuan Cheng",
   studentid: "23000xxxxx",
   blindid: "L2023XXXXX",
-  cthesisname: "博士研究生学位论文",
-  cheader: "北京大学博士学位论文",
-  ctitle: "北京大学学位论文 Typst 模板",
-  etitle: "Typst Template for Peking University Dissertations",
-  school: "某个学院",
-  cfirstmajor: "某个一级学科",
-  cmajor: "某个专业",
-  emajor: "Some Major",
-  direction: "某个研究方向",
-  csupervisor: "李四",
-  esupervisor: "Si Li",
+  cthesisname: "本科生毕业论文",
+  cheader: none,
+  ctitle: "论文中文标题",
+  etitle: "English Title",
+  school: "城市与环境学院",
+  cfirstmajor: none,
+  cmajor: "自然地理与资源环境",
+  emajor: none,
+  direction: none,
+  csupervisor: "大地 教授",
+  esupervisor: none,
   date: (year: 2026, month: 6),
-  // 学位类型："academic"（学术学位）或 "professional"（专业学位）
-  degree-type: "academic",
+  // 旧研究生模板兼容参数，本科封面默认忽略
+  degree-type: none,
   cabstract: [],
   ckeywords: (),
   eabstract: [],
@@ -83,14 +83,17 @@
   first-line-indent: 2em,
   outlinedepth: 3,
   blind: false,
-  listofimage: true,
-  listoftable: true,
-  listofcode: true,
-  alwaysstartodd: true,
+  listofimage: false,
+  listoftable: false,
+  listofcode: false,
+  alwaysstartodd: false,
   // 是否清除原创性声明页的页眉和页码
   // 如果想要去除原创性声明页的页眉和页码，可以设置为 true
-  // Word 模板中包含原创性声明页的页眉和页码，所以这里默认为 false
-  cleandeclaration: false,
+  // 本科模板中原创性声明页默认不显示页眉页脚
+  cleandeclaration: true,
+  // 原创性声明页电子签名。默认留空，传入 image(...) 等 content 时显示签名
+  candidate-signature: none,
+  supervisor-signature: none,
   // 预览模式下会将链接文本显示为蓝色
   // 在生成打印版时，可以设置为 false
   // 可通过命令行 --input preview=false 覆盖
@@ -119,6 +122,7 @@
   // 命令行参数覆盖配置文件中的值
   let blind = if _cli-blind != none { _cli-blind } else { blind }
   let preview = if _cli-preview != none { _cli-preview } else { preview }
+  let cheader = if cheader == none { ctitle } else { cheader }
   let alwaysstartodd = if _cli-alwaysstartodd != none {
     _cli-alwaysstartodd
   } else { alwaysstartodd }
@@ -145,7 +149,7 @@
   // ========== 页面设置 ==========
   set page(
     "a4",
-    margin: (top: 3cm, bottom: 2.5cm, left: 2.6cm, right: 2.6cm),
+    margin: (top: 25mm, bottom: 25mm, left: 25mm, right: 20mm),
     header: styles.make-header(cheader: cheader),
     footer: styles.make-footer(),
   )
@@ -226,6 +230,7 @@
     pages.cover-page-normal(
       cthesisname: cthesisname,
       ctitle: ctitle,
+      etitle: etitle,
       cauthor: cauthor,
       studentid: studentid,
       school: school,
@@ -265,7 +270,7 @@
 
   // ========== 目录和列表 ==========
   chineseoutline(
-    title: "目录",
+    title: "目  录",
     depth: outlinedepth,
     indent: true,
   )
@@ -305,7 +310,7 @@
   let use-gb7714 = not override-bib and bibcontent != none
   if use-gb7714 {
     let make-bib = () => gb7714-bibliography(
-      title: heading(numbering: none)[参考文献],
+      title: back-heading("参考文献", show-header: false, show-footer: false),
       full-control: entries => {
         set text(字号.五号)
         let extra-spacing = if bibversion == "2015" { 1pt } else { 0pt }
@@ -353,6 +358,10 @@
     pages.acknowledgements-page(
       first-line-indent: first-line-indent,
     )[#acknowledgements]
-    pages.declaration-page(cleandeclaration: cleandeclaration)
+    pages.declaration-page(
+      cleandeclaration: cleandeclaration,
+      candidate-signature: candidate-signature,
+      supervisor-signature: supervisor-signature,
+    )
   }
 }

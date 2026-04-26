@@ -1,4 +1,4 @@
-// 北京大学学位论文模板
+// 北京大学本科生毕业论文模板
 // 使用方法：typst compile main.typ --font-path fonts
 //
 // 命令行参数：
@@ -10,23 +10,17 @@
 
 #show: conf.with(
   // ========== 基本信息 ==========
-  cauthor: "张三",
-  eauthor: "San Zhang",
+  cauthor: "城小环",
+  eauthor: "Xiaohuan Cheng",
   studentid: "23000xxxxx",
   blindid: "L2023XXXXX",
-  cthesisname: "博士研究生学位论文",
-  cheader: "北京大学博士学位论文",
+  cthesisname: "本科生毕业论文",
   ctitle: "论文中文标题",
-  etitle: "English Title of Your Dissertation",
-  school: "某个学院",
-  cfirstmajor: "某个一级学科",
-  cmajor: "某个专业",
-  emajor: "Some Major",
-  direction: "某个研究方向",
-  csupervisor: "李四",
-  esupervisor: "Si Li",
+  etitle: "English Title of Your Thesis",
+  school: "城市与环境学院",
+  cmajor: "自然地理与资源环境",
+  csupervisor: "大地 教授",
   date: (year: 2026, month: 6),
-  degree-type: "academic", // "academic" 或 "professional"
 
   // ========== 中文摘要 ==========
   cabstract: [
@@ -40,7 +34,7 @@
   eabstract: [
     Write your English abstract here.
 
-    The abstract should briefly summarize the main content and research findings of your dissertation.
+    The abstract should briefly summarize the main content and research findings of your thesis.
   ],
   ekeywords: ("keyword1", "keyword2", "keyword3"),
 
@@ -59,11 +53,13 @@
   // first-line-indent: 2em,     // 首行缩进
   // outlinedepth: 3,            // 目录深度
   // blind: false,               // 盲审模式
-  // listofimage: true,          // 图片列表
-  // listoftable: true,          // 表格列表
-  // listofcode: true,           // 代码列表
-  // alwaysstartodd: true,       // 章节从奇数页开始
-  // cleandeclaration: false,    // 清除声明页页眉页码
+  // listofimage: false,         // 图片列表
+  // listoftable: false,         // 表格列表
+  // listofcode: false,          // 代码列表
+  // alwaysstartodd: false,      // 章节从奇数页开始
+  // cleandeclaration: true,     // 清除声明页页眉页码
+  // candidate-signature: image("signature-candidate.svg", height: 1.5em),
+  // supervisor-signature: image("signature-supervisor.svg", height: 1.5em),
   // preview: true,              // 预览模式（链接显示蓝色）
 )
 
