@@ -8,6 +8,7 @@ This fork is maintained for the undergraduate thesis workflow and example materi
 
 - [Rendered example PDF](output/pdf/thesis-inspection.pdf)
 - [PKU official undergraduate Word template](pku_official_template_2026.docx)
+- [PKU official undergraduate template, Acrobat-rendered PDF](pku_official_template_2026.pdf)
 - [Example cover image](images/cover.png)
 
 ## Quick Start
