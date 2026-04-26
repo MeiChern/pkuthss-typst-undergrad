@@ -1,6 +1,6 @@
 # modern-pku-thesis
 
-北京大学学位论文 Typst 模板 / Typst template for dissertations in Peking University (PKU).
+北京大学本科生毕业论文 Typst 模板 / Typst template for undergraduate theses in Peking University (PKU).
 
 ![Cover of an example thesis](./images/cover.png)
 
@@ -20,8 +20,8 @@ cd my-thesis
 ### 方式二：克隆仓库
 
 ```bash
-git clone https://github.com/pku-typst/pkuthss-typst.git
-cd pkuthss-typst
+git clone https://github.com/MeiChern/pkuthss-typst-undergrad.git
+cd pkuthss-typst-undergrad
 ```
 
 编辑 `thesis.typ`，参考其中的示例和文档。
@@ -71,6 +71,26 @@ typst compile main.typ --input preview=false
 # 章节不强制从奇数页开始
 typst compile main.typ --input alwaysstartodd=false
 ```
+
+## 示例信息与电子签名
+
+仓库中的 `thesis.typ` 示例已配置本科生封面信息：
+
+| 字段     | 示例值             |
+| -------- | ------------------ |
+| 姓名     | 城小环             |
+| 院系     | 城市与环境学院     |
+| 专业     | 自然地理与资源环境 |
+| 导师姓名 | 大地 教授          |
+
+原创性声明页支持可选电子签名。示例签名文件位于 `template/signature-candidate.svg` 和 `template/signature-supervisor.svg`，可在配置中传入：
+
+```typ
+candidate-signature: image("template/signature-candidate.svg", height: 1.5em),
+supervisor-signature: image("template/signature-supervisor.svg", height: 1.5em),
+```
+
+如果不设置这两个参数，声明页会保留空白签名线。
 
 ## 文档
 
