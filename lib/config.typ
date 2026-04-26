@@ -20,9 +20,9 @@
   小七: 5pt,
   // 下面是 Word 模板中不同组件的默认字号
   一级标题: 16pt,
-  二级标题: 14pt,
-  三级标题: 13pt,
-  图题: 11pt,
+  二级标题: 16pt,
+  三级标题: 14pt,
+  图题: 12pt,
   表题: 11pt,
   表文: 10.5pt,
   正文: 12pt,
@@ -54,9 +54,9 @@
 
 // 计数器定义
 // partcounter 状态:
-//   0 = 封面区域（无页眉页脚）
-//   1 = 前置部分（罗马数字页码，有页眉）
-//   2 = 正文部分（阿拉伯数字页码，有页眉）
+//   0 = 封面/版权区域（无页眉页脚）
+//   1 = 前置部分（本科模板默认无可见页码）
+//   2 = 正文部分（本科模板页脚为“第n页”）
 #let partcounter = counter("part")
 #let chaptercounter = counter("chapter")
 #let appendixcounter = counter("appendix")
@@ -84,7 +84,8 @@
 //   pagebreak: bool       - 是否在此 heading 前分页（默认 true）
 //   part: int | none      - 状态转换目标 (0/1/2/none)
 //   reset-page: bool      - 是否重置页码为 1（默认 false）
-//   show-header: bool     - 是否显示页眉（默认 true）
+//   show-header: bool      - 是否显示页眉（默认 true）
+//   show-footer: bool      - 是否显示页脚（默认按页面策略）
 //   header: content | none - 自定义页眉文本
 
 /// 创建前置部分的 heading（摘要、目录等）
@@ -106,6 +107,7 @@
       part: if enter-front { 1 } else { none },
       reset-page: enter-front,
       show-header: true,
+      show-footer: false,
       ..extra-meta.named(),
     ))],
   )[#title]
@@ -115,10 +117,12 @@
 /// - title: 标题文本
 /// - pagebreak: 是否分页（默认 true）
 /// - show-header: 是否显示页眉（默认 true）
+/// - show-footer: 是否显示页脚（默认 true）
 #let back-heading(
   title,
   pagebreak: true,
   show-header: true,
+  show-footer: true,
   ..extra-meta,
 ) = {
   heading(
@@ -127,6 +131,7 @@
     supplement: [#metadata((
       pagebreak: pagebreak,
       show-header: show-header,
+      show-footer: show-footer,
       ..extra-meta.named(),
     ))],
   )[#title]

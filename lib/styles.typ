@@ -42,29 +42,32 @@
   }
 }
 
+#let get-page-heading(loc) = {
+  let headings-after = query(selector(heading.where(level: 1)).after(loc))
+  let headings-before = query(selector(heading.where(level: 1)).before(loc))
+  let current-page = loc.page()
+
+  if headings-after.len() > 0 {
+    let next-heading = headings-after.first()
+    if next-heading.location().page() == current-page {
+      return next-heading
+    }
+  }
+
+  if headings-before.len() > 0 {
+    headings-before.last()
+  } else {
+    none
+  }
+}
+
 // 生成页眉内容
 #let make-header(cheader: none) = context {
   let part = partcounter.at(here()).first()
 
   // 使用逻辑页码进行奇偶判断
   let logical-page = counter(page).at(here()).first()
-
-  // 查找当前页面之后的第一个 heading（用于处理页眉在 heading 之前渲染的情况）
-  let headings-after = query(selector(heading.where(level: 1)).after(here()))
-  let headings-before = query(selector(heading.where(level: 1)).before(here()))
-  let current-physical-page = here().page()
-
-  // 检查当前页面是否有 heading
-  let current-page-heading = if headings-after.len() > 0 {
-    let next-heading = headings-after.first()
-    if next-heading.location().page() == current-physical-page {
-      next-heading
-    } else {
-      none
-    }
-  } else {
-    none
-  }
+  let current-page-heading = get-page-heading(here())
 
   // 检查当前页面是否是前置部分第一页（摘要页，会将 part 更新为 1）
   let is-front-first-page = if current-page-heading != none {
@@ -95,50 +98,28 @@
 
   // 跳过的空白页不显示页眉
   if skippedstate.at(here()) and is-even { return }
-
-  // 确定使用哪个 heading
-  let el = if current-page-heading != none {
-    current-page-heading
-  } else if headings-before.len() > 0 {
-    headings-before.last()
-  } else {
-    return
-  }
+  if current-page-heading == none { return }
 
   // 检查是否显示页眉
-  let meta = get-heading-meta(el)
+  let meta = get-heading-meta(current-page-heading)
   if not meta.at("show-header", default: true) { return }
 
-  let header-gap = 3pt
+  let header-text = meta.at("header", default: none)
+  if header-text == none {
+    header-text = if cheader != none { cheader } else { current-page-heading.body }
+  }
 
   set text(字号.五号)
   set par(spacing: 0pt)
   set align(center)
 
-  // 对应 Word 模板中页眉上边距
-  place(top + center, dy: 2cm)[
+  // 本科模板页眉距约 9.8 mm。
+  place(top + center, dy: 9.8mm)[
     #block(width: 100%)[
       #stack(
         dir: ttb,
         spacing: 3pt,
-        if is-even {
-          // 偶数页：论文标题
-          cheader
-        } else {
-          // 奇数页：章节标题
-          let header-text = meta.at("header", default: none)
-          if header-text == none { header-text = el.body }
-
-          // 编号（如果有）
-          if el.numbering != none {
-            chinesenumbering(
-              ..counter(heading).at(el.location()),
-              location: el.location(),
-            )
-            h(0.5em)
-          }
-          header-text
-        },
+        header-text,
         line(stroke: 0.75pt, length: 100%),
       )
     ]
@@ -156,8 +137,14 @@
   let logical-page = counter(page).at(here()).first()
   if skippedstate.at(here()) and calc.even(logical-page) { return }
 
-  // 封面和版权声明页没有页码
-  if query(selector(heading).before(here())).len() < 2 { return }
+  let current-page-heading = get-page-heading(here())
+  if current-page-heading != none {
+    let meta = get-heading-meta(current-page-heading)
+    if not meta.at("show-footer", default: true) { return }
+  }
+
+  // 本科模板前置部分无可见页码。
+  if part == 1 { return }
 
   // 当存在 <__clean_declaration__> 元素时，不显示原创性声明页的页码
   if (
@@ -165,19 +152,15 @@
       and query(selector(<__clean_declaration__>)).len() > 0
   ) { return }
 
-  set text(字号.页码)
+  set text(字号.五号, font: 字体.黑体, weight: "bold")
   set align(center)
 
   let page-num = counter(page).at(here()).first()
 
   place(bottom + center)[
     #set align(bottom)
-    #if part == 1 {
-      numbering("I", page-num)
-    } else {
-      str(page-num)
-    }
-    // 对应 Word 模板中页脚下边距
+    第#box[#str(page-num)]页
+    // 对应 Word 模板中页脚下边距 17.5 mm。
     #v(1.75cm)
   ]
 }
@@ -294,12 +277,12 @@
   } else if it.kind == image {
     it.body
     [
-      #set text(字号.五号)
+      #set text(字号.图题)
       #it.caption
     ]
   } else if it.kind == table {
     [
-      #set text(字号.五号)
+      #set text(字号.表题)
       #it.caption
     ]
     it.body

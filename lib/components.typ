@@ -8,8 +8,8 @@
 
 // 中文目录
 // 使用 Typst 原生 outline + show rule 实现
-#let chineseoutline(title: "目录", depth: none, indent: false) = {
-  front-heading(title)
+#let chineseoutline(title: "目  录", depth: none, indent: false) = {
+  front-heading(title, show-header: false)
 
   // Word 模板中目录的行距为 20pt
   set par(leading: 10.5pt, spacing: 10.5pt, justify: true)
@@ -96,7 +96,7 @@
 // 图表列表（插图、表格、代码）
 // 使用 Typst 原生 outline + show rule 实现
 #let listoffigures(title: "插图", kind: image, supplements: 引用记号) = {
-  front-heading(title)
+  front-heading(title, show-header: false)
 
   show outline.entry: it => context {
     let el = it.element

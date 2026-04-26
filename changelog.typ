@@ -11,7 +11,7 @@
 )
 #let pku-spec = link(
   "https://grs.pku.edu.cn/docs/2024-02/20240229092001843564.doc",
-  "北京大学博士研究生学位论文格式模板（2024）",
+  "旧版北京大学学位论文格式模板（2024）",
 )
 
 #set enum(indent: 0em)
@@ -96,7 +96,7 @@
   - 使用 `heading` 的 `supplement` 字段传递元数据，消除了对标题文本的硬编码匹配。
   - 更新了 `AGENTS.md` 文档，详细记录了内部架构设计。
 + 新增功能：
-  - 新增 `degree-type` 配置项，支持选择"学术学位"或"专业学位"。
+  - 新增旧版 `degree-type` 配置项，用于兼容研究生模板封面选项。
   - 新增命令行参数支持（`--input blind=true/false`、`--input preview=true/false`、`--input alwaysstartodd=true/false`）。
   - 引入 #link("https://typst.app/universe/package/codly/", `codly`) 包，支持代码块语法高亮。
   - 新增 `preview` 配置项，控制链接文本是否显示为蓝色。

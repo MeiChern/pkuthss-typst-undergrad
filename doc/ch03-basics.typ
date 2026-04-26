@@ -377,7 +377,7 @@ Typst 支持 BibLaTeX 格式的 `.bib` 文件。在文档中引用文献使用 `
   caption: "配置参考文献",
 )
 
-根据#link("https://grs.pku.edu.cn/docs/2024-02/20240229092001843564.doc")[北京大学博士研究生学位论文格式模板(2024)]，文献索引方式可选择"顺序编码制"（`bibstyle: "numeric"`）或"著者—出版年制"（`bibstyle: "author-date"`）。
+本科模板默认使用顺序编码制参考文献；如院系另有要求，也可通过 `bibstyle: "author-date"` 切换为著者—出版年制。
 
 著者—出版年制下，参考文献列表默认先中文、后外文；中文条目按作者姓氏的汉语拼音排序（由集成的 gb7714-bilingual 与 auto-pinyin 实现）。若个别姓氏的多音字排序不符合预期，可通过 `bib-pinyin-override` 指定读音。
 
